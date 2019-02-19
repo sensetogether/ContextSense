@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">My Sensor</string>
+    <string name="title_detect">Detection</string>
+    <string name="title_sensing">Sensing</string>
+    <string name="title_gps">GPS</string>
+    <string name="button_sensors">Show all sensors</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="send">Send</string>
+    <string name="clear">Clear</string>
+    <string name="switch_log">Save log</string>
+    <string name="hint_detect">Press start to detect light density, proximity and GPS location (if available).</string>
+    <string name="hint_sensing">Press start to enable environmental sensors, and stop to save the log (if checked).</string>
+    <string name="hint_gps">Press start to turn on the GPS positioning system.</string>
+    <string name="open_network">Discovering Wifi Direct neighbors providing services …</string>
+    <string name="count_sensing">Sensing count: </string>
+    <string name="feedback">Feedback!</string>
+    <string name="in_pocket">In-Pocket</string>
+    <string name="in_door">In-Door</string>
+    <string name="under_ground">Under-Ground</string>
+    <string name="out_pocket">Out-Pocket</string>
+    <string name="out_door">Out-Door</string>
+    <string name="on_ground">On-Ground</string>
+    <string name="email_title">Sensing data from MySensor</string>
+    <string name="switch_mail">&amp; Mail log</string>
+    <string name="notify_title">Inference Result</string>
+    <string name="notify_content">…</string>
+</resources>
