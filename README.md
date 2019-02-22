@@ -34,7 +34,7 @@ Running on the mobile phone:
 ------------------------------------------------
 Note that the application starts with a permission checker and you need to grant these permissions.
 The application may notify the end user that some components (e.g., GPS) should be turned on. 
-The application initially shows a sensor list of the device.
+The application initially shows the list of sensors  that are available on the device.
 
 
 License 
