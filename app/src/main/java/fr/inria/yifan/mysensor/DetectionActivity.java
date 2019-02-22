@@ -196,7 +196,10 @@ public class DetectionActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         this.unregisterReceiver(mInferHelper);
-        mNotificationManager.cancel(1001);
+        if(mNotificationManager != null)
+        {
+            mNotificationManager.cancel(1001);
+        }
         isSensingRun = false;
         mSensorHelper.stopService();
         mContextHelper.stopService();

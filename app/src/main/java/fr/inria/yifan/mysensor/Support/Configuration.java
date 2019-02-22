@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class Configuration implements Serializable {
 
     // Parameters for sensing sampling
-    public static final int SAMPLE_WINDOW_MS = 100;
+    public static final int SAMPLE_WINDOW_MS = 1000;
     public static final int SAMPLE_NUM_WINDOW = 1;
     // Permission request indicator code
     public static final int PERMS_REQUEST_RECORD = 1000;

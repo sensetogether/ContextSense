@@ -76,11 +76,20 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/hierar_intro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ground_view"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:textSize="@dimen/font_size_normal"
+        android:text="@string/hint_hierarchy"/>
+
     <LinearLayout
         android:id="@+id/hierar_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/ground_view"
+        android:layout_below="@id/hierar_intro"
         android:layout_marginLeft="@dimen/activity_vertical_margin"
         android:layout_marginStart="@dimen/activity_vertical_margin"
         android:orientation="horizontal">

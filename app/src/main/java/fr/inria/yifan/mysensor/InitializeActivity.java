@@ -44,7 +44,7 @@ public class InitializeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_initialize);
 
         TextView welcomeView = findViewById(R.id.welcome_view);
-        welcomeView.setText("Please select a function below to startService after permission checked.");
+        welcomeView.setText(R.string.hint_initial);
 
         checkPermission();
     }

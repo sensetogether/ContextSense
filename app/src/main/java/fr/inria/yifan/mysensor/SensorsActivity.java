@@ -32,7 +32,7 @@ public class SensorsActivity extends AppCompatActivity {
     // Clear all views content
     @SuppressLint("SetTextI18n")
     private void initialViews() {
-        mTextTitle.setText("Available Sensors:");
+        mTextTitle.setText("Available sensors list:");
         mTextMessage.setText("...");
     }
 
