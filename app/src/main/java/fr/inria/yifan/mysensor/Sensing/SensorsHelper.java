@@ -132,13 +132,13 @@ public class SensorsHelper {
     };
 
     // Register the broadcast receiver with the intent values to be matched
-    public SensorsHelper(Activity activity) {
+    public SensorsHelper(Context context) {
 
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE_IN_HZ, AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
         mAWeighting = new AWeighting(SAMPLE_RATE_IN_HZ);
         //Log.d(TAG, "Buffer size = " + BUFFER_SIZE);
 
-        mSensorManager = (SensorManager) activity.getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         assert mSensorManager != null;
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         System.out.println("Light: mA " + (mSensorLight != null ? mSensorLight.getPower() : 0));

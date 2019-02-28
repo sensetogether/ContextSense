@@ -17,7 +17,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
@@ -33,7 +32,6 @@ import java.util.Calendar;
 
 import fr.inria.yifan.mysensor.Support.SlideWindow;
 
-import static fr.inria.yifan.mysensor.Support.Configuration.ENABLE_REQUEST_LOCATION;
 import static fr.inria.yifan.mysensor.Support.Configuration.LOCATION_UPDATE_DISTANCE;
 import static fr.inria.yifan.mysensor.Support.Configuration.LOCATION_UPDATE_TIME;
 import static fr.inria.yifan.mysensor.Support.Configuration.SAMPLE_NUM_WINDOW;
@@ -57,7 +55,7 @@ public class ContextHelper extends BroadcastReceiver {
     private static final int GPS_ACC_OUT = 1000;
 
     // Declare references and managers
-    private Activity mActivity;
+    private Context mContext;
     private TelephonyManager mTelephonyManager;
     private LocationManager mLocationManager;
     private ConnectivityManager mConnectManager;
@@ -124,13 +122,13 @@ public class ContextHelper extends BroadcastReceiver {
     // Constructor initialization
     @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public ContextHelper(Activity activity) {
-        mActivity = activity;
+    public ContextHelper(Context context) {
+        mContext = context;
 
-        mTelephonyManager = (TelephonyManager) mActivity.getSystemService(Context.TELEPHONY_SERVICE);
-        mLocationManager = (LocationManager) mActivity.getSystemService(Context.LOCATION_SERVICE);
-        mConnectManager = (ConnectivityManager) mActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mWifiManager = (WifiManager) mActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        mConnectManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mWifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         /* Searching neighbor cells does not work
         List<NeighboringCellInfo> neighborList = mTelephonyManager.getNeighboringCellInfo();
@@ -143,7 +141,7 @@ public class ContextHelper extends BroadcastReceiver {
         */
 
         //IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        //Intent batteryStatus = mActivity.registerReceiver(null, filter);
+        //Intent batteryStatus = mContext.registerReceiver(null, filter);
 
         // Are we charging / charged?
         //assert batteryStatus != null;
@@ -182,17 +180,17 @@ public class ContextHelper extends BroadcastReceiver {
             // Start GPS and location service
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_UPDATE_TIME, LOCATION_UPDATE_DISTANCE, mListenerLoc);
         } else {
-            Toast.makeText(mActivity, "Please enable the GPS", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            mActivity.startActivityForResult(intent, ENABLE_REQUEST_LOCATION);
+            Toast.makeText(mContext, "Please enable the GPS", Toast.LENGTH_SHORT).show();
+            //Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            //mContext.startActivityForResult(intent, ENABLE_REQUEST_LOCATION);
         }
 
         // Google activity recognition API
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mActivity, 1000,
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 1000,
                 new Intent("ActivityRecognitionResult"), PendingIntent.FLAG_CANCEL_CURRENT);
-        ActivityRecognitionClient activityRecognitionClient = ActivityRecognition.getClient(mActivity);
+        ActivityRecognitionClient activityRecognitionClient = ActivityRecognition.getClient(mContext);
         activityRecognitionClient.requestActivityUpdates(LOCATION_UPDATE_TIME, pendingIntent);
-        mActivity.registerReceiver(this, new IntentFilter("ActivityRecognitionResult"));
+        mContext.registerReceiver(this, new IntentFilter("ActivityRecognitionResult"));
 
         // Start the loop thread for synchronised sensing window
         final int delay = SAMPLE_WINDOW_MS / SAMPLE_NUM_WINDOW;
@@ -215,7 +213,7 @@ public class ContextHelper extends BroadcastReceiver {
         try {
             mLocationManager.removeUpdates(mListenerLoc);
             mTelephonyManager.listen(mListenerPhone, PhoneStateListener.LISTEN_NONE);
-            mActivity.unregisterReceiver(this);
+            mContext.unregisterReceiver(this);
         } catch (Exception e) {
             //Pass
         }
@@ -305,7 +303,7 @@ public class ContextHelper extends BroadcastReceiver {
         if (ActivityRecognitionResult.hasResult(intent)) {
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
             userActivity = result.getMostProbableActivity().toString();
-            //Log.e(TAG, "Received intent: " + result.getMostProbableActivity().toString());
+            Log.e(TAG, "Received intent: " + result.getMostProbableActivity().toString());
         }
     }
 
