@@ -39,7 +39,7 @@ The application may also request to turn on some components in runtime, such as 
 
 License 
 -------------
-#ContextSense is available under the terms of the Apache License, which implies that application developers are free to use #ContextSense. 
+#ContextSense is available under the terms of the GNU GPL v3 License, which implies that application developers are free to use #ContextSense. 
 It also means that developers are invited to contribute to improve #ContextSense as long as the original source code remains open.
 
 Contributors
