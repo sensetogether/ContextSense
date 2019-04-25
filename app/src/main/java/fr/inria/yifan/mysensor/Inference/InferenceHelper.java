@@ -34,6 +34,8 @@ public class InferenceHelper extends BroadcastReceiver {
 
     private static final String TAG = "Inference helper";
 
+    private Context mContext;
+
     // Instances for data set initialization
     private Instances instancesPocket;
     private Instances instancesDoor;
@@ -46,104 +48,8 @@ public class InferenceHelper extends BroadcastReceiver {
 
     // Load the trained models and register instances
     public InferenceHelper(Context context) {
-
-        File filePocket = context.getFileStreamPath(MODEL_INPOCKET);
-        File fileDoor = context.getFileStreamPath(MODEL_INDOOR);
-        File fileGround = context.getFileStreamPath(MODEL_UNDERGROUND);
-
-        FileInputStream fileInputStream;
-        ObjectInputStream objectInputStream;
-        FileOutputStream fileOutputStream;
-        ObjectOutputStream objectOutputStream;
-
-        // Check local model existence
-        if (!filePocket.exists() || !fileDoor.exists() || !fileGround.exists()) {
-            Log.d(TAG, "Local models do not exist.");
-            // Initialize trained models
-            try {
-                fileInputStream = context.getAssets().openFd(MODEL_INPOCKET).createInputStream();
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                classifierPocket = (HoeffdingTree) objectInputStream.readObject();
-                fileInputStream = context.getAssets().openFd(DATASET_INPOCKET).createInputStream();
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                instancesPocket = (Instances) objectInputStream.readObject();
-
-                fileInputStream = context.getAssets().openFd(MODEL_INDOOR).createInputStream();
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                classifierDoor = (HoeffdingTree) objectInputStream.readObject();
-                fileInputStream = context.getAssets().openFd(DATASET_INDOOR).createInputStream();
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                instancesDoor = (Instances) objectInputStream.readObject();
-
-                fileInputStream = context.getAssets().openFd(MODEL_UNDERGROUND).createInputStream();
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                classifierGround = (HoeffdingTree) objectInputStream.readObject();
-                fileInputStream = context.getAssets().openFd(DATASET_UNDERGROUND).createInputStream();
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                instancesGround = (Instances) objectInputStream.readObject();
-
-                objectInputStream.close();
-                fileInputStream.close();
-                Log.d(TAG, "Success in loading from assets.");
-
-                fileOutputStream = context.openFileOutput(MODEL_INPOCKET, Context.MODE_PRIVATE);
-                objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(classifierPocket);
-                fileOutputStream = context.openFileOutput(DATASET_INPOCKET, Context.MODE_PRIVATE);
-                objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(instancesPocket);
-
-                fileOutputStream = context.openFileOutput(MODEL_INDOOR, Context.MODE_PRIVATE);
-                objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(classifierDoor);
-                fileOutputStream = context.openFileOutput(DATASET_INDOOR, Context.MODE_PRIVATE);
-                objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(instancesDoor);
-
-                fileOutputStream = context.openFileOutput(MODEL_UNDERGROUND, Context.MODE_PRIVATE);
-                objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(classifierGround);
-                fileOutputStream = context.openFileOutput(DATASET_UNDERGROUND, Context.MODE_PRIVATE);
-                objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(instancesGround);
-
-                objectOutputStream.close();
-                fileOutputStream.close();
-                Log.d(TAG, "Success in saving into file.");
-            } catch (Exception e) {
-                Log.d(TAG, "Error when loading from file: " + e);
-            }
-        } else {
-            Log.d(TAG, "Local models already exist.");
-            try {
-                fileInputStream = context.openFileInput(MODEL_INPOCKET);
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                classifierPocket = (HoeffdingTree) objectInputStream.readObject();
-                fileInputStream = context.openFileInput(DATASET_INPOCKET);
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                instancesPocket = (Instances) objectInputStream.readObject();
-
-                fileInputStream = context.openFileInput(MODEL_INDOOR);
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                classifierDoor = (HoeffdingTree) objectInputStream.readObject();
-                fileInputStream = context.openFileInput(DATASET_INDOOR);
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                instancesDoor = (Instances) objectInputStream.readObject();
-
-                fileInputStream = context.openFileInput(MODEL_UNDERGROUND);
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                classifierGround = (HoeffdingTree) objectInputStream.readObject();
-                fileInputStream = context.openFileInput(DATASET_UNDERGROUND);
-                objectInputStream = new ObjectInputStream(fileInputStream);
-                instancesGround = (Instances) objectInputStream.readObject();
-
-                objectInputStream.close();
-                fileInputStream.close();
-                Log.d(TAG, "Success in loading from file.");
-            } catch (Exception e) {
-                Log.d(TAG, "Error when loading model file: " + e);
-            }
-        }
+        mContext = context;
+        loadModels();
     }
 
     // Inference on the new instance
@@ -238,26 +144,163 @@ public class InferenceHelper extends BroadcastReceiver {
         switch (hierarResult) {
             case 1:
                 updatePocket(sample);
+                saveModels();
                 break;
             case 2:
                 updateDoor(sample);
+                saveModels();
                 break;
             case 3:
                 updateGround(sample);
+                saveModels();
                 break;
             case 4:
                 Random ran = new Random();
                 if (ran.nextInt(2) == 0) {
                     Log.d(TAG, "Door update");
                     updateDoor(sample);
+                    saveModels();
                 } else {
                     Log.d(TAG, "Ground update");
                     updateGround(sample);
-                }
+                    saveModels();
+                 }
                 break;
             default:
                 Log.e(TAG, "Wrong inference result code");
                 break;
+        }
+    }
+
+    // Load models and data set format from files
+    private void loadModels() {
+
+        File filePocket = mContext.getFileStreamPath(MODEL_INPOCKET);
+        File fileDoor = mContext.getFileStreamPath(MODEL_INDOOR);
+        File fileGround = mContext.getFileStreamPath(MODEL_UNDERGROUND);
+
+        FileInputStream fileInputStream;
+        ObjectInputStream objectInputStream;
+        FileOutputStream fileOutputStream;
+        ObjectOutputStream objectOutputStream;
+
+        // Check local models existence
+        if (!filePocket.exists() || !fileDoor.exists() || !fileGround.exists()) {
+            Log.d(TAG, "Local models do not exist.");
+            try {
+                // Load models from assets
+                fileInputStream = mContext.getAssets().openFd(MODEL_INPOCKET).createInputStream();
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                classifierPocket = (HoeffdingTree) objectInputStream.readObject();
+                fileInputStream = mContext.getAssets().openFd(DATASET_INPOCKET).createInputStream();
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                instancesPocket = (Instances) objectInputStream.readObject();
+
+                fileInputStream = mContext.getAssets().openFd(MODEL_INDOOR).createInputStream();
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                classifierDoor = (HoeffdingTree) objectInputStream.readObject();
+                fileInputStream = mContext.getAssets().openFd(DATASET_INDOOR).createInputStream();
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                instancesDoor = (Instances) objectInputStream.readObject();
+
+                fileInputStream = mContext.getAssets().openFd(MODEL_UNDERGROUND).createInputStream();
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                classifierGround = (HoeffdingTree) objectInputStream.readObject();
+                fileInputStream = mContext.getAssets().openFd(DATASET_UNDERGROUND).createInputStream();
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                instancesGround = (Instances) objectInputStream.readObject();
+
+                objectInputStream.close();
+                fileInputStream.close();
+                Log.d(TAG, "Success in loading from assets.");
+
+                // Save models into app data
+                fileOutputStream = mContext.openFileOutput(MODEL_INPOCKET, Context.MODE_PRIVATE);
+                objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(classifierPocket);
+                fileOutputStream = mContext.openFileOutput(DATASET_INPOCKET, Context.MODE_PRIVATE);
+                objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(instancesPocket);
+
+                fileOutputStream = mContext.openFileOutput(MODEL_INDOOR, Context.MODE_PRIVATE);
+                objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(classifierDoor);
+                fileOutputStream = mContext.openFileOutput(DATASET_INDOOR, Context.MODE_PRIVATE);
+                objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(instancesDoor);
+
+                fileOutputStream = mContext.openFileOutput(MODEL_UNDERGROUND, Context.MODE_PRIVATE);
+                objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(classifierGround);
+                fileOutputStream = mContext.openFileOutput(DATASET_UNDERGROUND, Context.MODE_PRIVATE);
+                objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(instancesGround);
+
+                objectOutputStream.close();
+                fileOutputStream.close();
+                Log.d(TAG, "Success in saving into file.");
+            } catch (Exception e) {
+                Log.d(TAG, "Error when loading from file: " + e);
+            }
+        }
+        // Local models already exist
+        else {
+            Log.d(TAG, "Local models already exist.");
+            try {
+                // Load models from app data
+                fileInputStream = mContext.openFileInput(MODEL_INPOCKET);
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                classifierPocket = (HoeffdingTree) objectInputStream.readObject();
+                fileInputStream = mContext.openFileInput(DATASET_INPOCKET);
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                instancesPocket = (Instances) objectInputStream.readObject();
+
+                fileInputStream = mContext.openFileInput(MODEL_INDOOR);
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                classifierDoor = (HoeffdingTree) objectInputStream.readObject();
+                fileInputStream = mContext.openFileInput(DATASET_INDOOR);
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                instancesDoor = (Instances) objectInputStream.readObject();
+
+                fileInputStream = mContext.openFileInput(MODEL_UNDERGROUND);
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                classifierGround = (HoeffdingTree) objectInputStream.readObject();
+                fileInputStream = mContext.openFileInput(DATASET_UNDERGROUND);
+                objectInputStream = new ObjectInputStream(fileInputStream);
+                instancesGround = (Instances) objectInputStream.readObject();
+
+                objectInputStream.close();
+                fileInputStream.close();
+                Log.d(TAG, "Success in loading from file.");
+            } catch (Exception e) {
+                Log.d(TAG, "Error when loading model file: " + e);
+            }
+        }
+    }
+
+    // Save the updated models
+    private void saveModels() {
+        FileOutputStream fileOutputStream;
+        ObjectOutputStream objectOutputStream;
+
+        try {
+            // Save models into app data
+            fileOutputStream = mContext.openFileOutput(MODEL_INPOCKET, Context.MODE_PRIVATE);
+            objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(classifierPocket);
+
+            fileOutputStream = mContext.openFileOutput(MODEL_INDOOR, Context.MODE_PRIVATE);
+            objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(classifierDoor);
+
+            fileOutputStream = mContext.openFileOutput(MODEL_UNDERGROUND, Context.MODE_PRIVATE);
+            objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(classifierGround);
+
+            objectOutputStream.close();
+            fileOutputStream.close();
+        } catch (Exception e) {
+            Log.d(TAG, "Error when saving model file: " + e);
         }
     }
 
