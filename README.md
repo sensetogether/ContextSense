@@ -1,3 +1,4 @@
+# ContextSense
 Key Features 
 ---------------------
 #ContextSense is an Android application that supports user context inference, sensing data collection, and GPS positioning, by leveraging embedded sensors on the smart phone.
